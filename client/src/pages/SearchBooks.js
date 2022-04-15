@@ -2,34 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { Jumbotron, Container, Col, Form, Button, Card, CardColumns } from 'react-bootstrap';
 import { useQuery, useMutation } from '@apollo/client';
 import { ADD_BOOK } from '../utils/mutations';
-import { QUERY_ME, QUERY_BOOKS } from '../utils/queries';
+import { QUERY_ME } from '../utils/queries';
 import { searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
 import auth from '../utils/auth';
 
 const SearchBooks = () => {
-  // const [addBook, { error }] = useMutation(ADD_BOOK);
-  const [addBook, { error }] = useMutation(ADD_BOOK, {
-    update(cache, { data: { addBook } }) {
-      try {
-        // could potentially not exist yet, so wrap in a try...catch
-        const { books } = cache.readQuery({ query: QUERY_BOOKS });
-        cache.writeQuery({
-          query: QUERY_BOOKS,
-          data: { books: [addBook, ...books] }
-        });
-      } catch (e) {
-        console.error(e);
-      }
+  const [addBook, { error }] = useMutation(ADD_BOOK);
+  // const [addBook, { error }] = useMutation(ADD_BOOK, {
+  //   update(cache, { data: { addBook } }) {
+  //     try {
+  //       // could potentially not exist yet, so wrap in a try...catch
+  //       const { books}  = cache.readQuery({ query: QUERY_BOOKS });
+  //       cache.writeQuery({
+  //         query: QUERY_BOOKS,
+  //         data: { books: [addBook, ...books] }
+  //       });
+  //     } catch (e) {
+  //       console.error(e);
+  //     }
   
-      // update me object's cache, appending new thought to the end of the array
-      const { me } = cache.readQuery({ query: QUERY_ME });
-      cache.writeQuery({
-        query: QUERY_ME,
-        data: { me: { ...me, savedBooks: [...me.savedBooks, addBook] } }
-      });
-    }
-  });
+  //     // update me object's cache, appending new thought to the end of the array
+  //     const { me } = cache.readQuery({ query: QUERY_ME });
+  //     cache.writeQuery({
+  //       query: QUERY_ME,
+  //       data: { me: { ...me, savedBooks: [...me.savedBooks, addBook] } }
+  //     });
+  //   }
+  // });
 
    // use object destructuring to extract `data` from the `useQuery` Hook's response and rename it `userData` to be more descriptive
    const { data: userData } = useQuery(QUERY_ME);
@@ -84,10 +84,10 @@ const SearchBooks = () => {
 
   // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
-   
     // find the book in `searchedBooks` state by the matching id
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-    console.log(bookToSave);
+    // console.log(bookToSave);
+
     if (bookToSave.bookId) {
       var newBookId = bookToSave.bookId;
     } else {

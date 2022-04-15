@@ -20,6 +20,9 @@ const SignupForm = () => {
   };
 
   const handleFormSubmit = async event => {
+    function refreshPage() {
+      window.location.reload();
+    }
     event.preventDefault();
 
     // check if form has everything (as per react-bootstrap docs)
@@ -36,6 +39,7 @@ const SignupForm = () => {
       });
     
       Auth.login(data.addUser.token);
+      refreshPage();
     } catch (e) {
       console.error(e);
     }

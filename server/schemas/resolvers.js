@@ -16,7 +16,7 @@ const resolvers = {
       throw new AuthenticationError('Not logged in');
     },
     books: async () => {
-      return Book.find();
+      return Book.find({});
     },
   },
   Mutation: {
@@ -68,14 +68,15 @@ const resolvers = {
     
       throw new AuthenticationError('You need to be logged in!');
     },
-    removeBook: async (parent, { userId, bookId }, context) => {
+    removeBook: async (parent, { bookId }, context) => {
       if (context.user) {
-        const updatedBooks = await Book.remove({ bookId });
         const updatedList = await User.findOneAndUpdate(
-          { _id: userId },
-          { $pull: { savedBooks: { savedBooks: updatedBooks._id } } },
+          { _id: context.user._id },
+          { $pull: { savedBooks: { savedBooks: bookId } } },
           { new: true, runValidators: true }
         );
+        const updatedBooks = await Book.deleteOne({ bookId });
+      
         return updatedBooks;
       }
     
