@@ -24,23 +24,23 @@ export const ADD_USER = gql`
   }
 `;
 
-export const ADD_FRIEND = gql`
-  mutation addFriend($id: ID!) {
-    addFriend(friendId: $id) {
-      _id
-      username
-      friendCount
-      friends {
+export const ADD_BOOK = gql`
+  mutation addBook($bookId: String!, $authors: [String], $title: String, $image: String, $link: String, $description: String ) {
+    addBook(bookId: $bookId, authors: $authors, title: $title, image: $image, link: $link, description: $description) {
         _id
-        username
-      }
+        authors
+        description
+        bookId
+        image
+        link
+        title
     }
   }
 `;
 
-export const ADD_BOOK = gql`
-  mutation addBook($bookId: String!) {
-    addBook(bookId: $bookId) {
+export const REMOVE_BOOK = gql`
+  mutation removeBook($userId: String!, $bookId: String!) {
+    removeBook(userId: $userId, bookId: $bookId) {
       _id
       authors
       description

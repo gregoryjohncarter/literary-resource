@@ -1,15 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
-
-import { getMe, deleteBook } from '../utils/API';
+// import { Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useQuery, useMutation } from '@apollo/client';
+import { REMOVE_BOOK } from '../utils/mutations';
+import { QUERY_ME, QUERY_BOOKS } from '../utils/queries';
+// import { getMe, deleteBook } from '../utils/API';
 import Auth from '../utils/auth';
-import { removeBookId } from '../utils/localStorage';
+// import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
-  const [userData, setUserData] = useState({});
+  const { data: userDataMe } = useQuery(QUERY_ME);
+
+  const user = userDataMe?.me.savedBooks || {};
+ 
+  const [userData, setUserData] = useState();
+  const [removeBook, { error }] = useMutation(REMOVE_BOOK, {
+    update(cache, { data: { removeBook } }) {
+      try {
+        // could potentially not exist yet, so wrap in a try...catch
+        const { books } = cache.readQuery({ query: QUERY_BOOKS });
+        cache.writeQuery({
+          query: QUERY_BOOKS,
+          data: { books: [removeBook, ...books] }
+        });
+      } catch (e) {
+        console.error(e);
+      }
+  
+      // update me object's cache, appending new thought to the end of the array
+      const { me } = cache.readQuery({ query: QUERY_ME });
+      cache.writeQuery({
+        query: QUERY_ME,
+        data: { me: { ...me, savedBooks: [...me.savedBooks, removeBook] } }
+      });
+    }
+  });
 
   // use this to determine if `useEffect()` hook needs to run again
-  const userDataLength = Object.keys(userData).length;
+  const userDataLength = Object.keys(user).length;
 
   useEffect(() => {
     const getUserData = async () => {
@@ -20,13 +49,10 @@ const SavedBooks = () => {
           return false;
         }
 
-        const response = await getMe(token);
-
-        if (!response.ok) {
+        if (!userDataLength) {
           throw new Error('something went wrong!');
         }
-
-        const user = await response.json();
+        
         setUserData(user);
       } catch (err) {
         console.error(err);
@@ -34,7 +60,7 @@ const SavedBooks = () => {
     };
 
     getUserData();
-  }, [userDataLength]);
+  }, [user, userDataLength]);
 
   // create function that accepts the book's mongo _id value as param and deletes the book from the database
   const handleDeleteBook = async (bookId) => {
@@ -45,16 +71,9 @@ const SavedBooks = () => {
     }
 
     try {
-      const response = await deleteBook(bookId, token);
-
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
-      const updatedUser = await response.json();
-      setUserData(updatedUser);
-      // upon success, remove book's id from localStorage
-      removeBookId(bookId);
+      await removeBook({
+        variables: { bookId }
+      });
     } catch (err) {
       console.error(err);
     }
@@ -74,12 +93,12 @@ const SavedBooks = () => {
       </Jumbotron>
       <Container>
         <h2>
-          {userData.savedBooks.length
-            ? `Viewing ${userData.savedBooks.length} saved ${userData.savedBooks.length === 1 ? 'book' : 'books'}:`
+          {user.length
+            ? `Viewing ${user.length} saved ${user.length === 1 ? 'book' : 'books'}:`
             : 'You have no saved books!'}
         </h2>
         <CardColumns>
-          {userData.savedBooks.map((book) => {
+          {user.map((book) => {
             return (
               <Card key={book.bookId} border='dark'>
                 {book.image ? <Card.Img src={book.image} alt={`The cover for ${book.title}`} variant='top' /> : null}
