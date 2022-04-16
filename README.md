@@ -13,3 +13,7 @@ Express, Apollo Server Express, bcrypt, GraphQL, JsonWebToken, Mongoose, concurr
 The server runs on Express and is interfaced with Apollo Server Express / Apollo Client using GraphQL and MongoDB in combination. The MongoDB schemas are created using Mongoose Object Data Modeling. From there, using auth-related NPMs such as bcrypt and JsonWebToken, the login and signup functionalities support the system of saving entries to the relevant user page. 
 
 ## Deployed Link
+<a href="https://safe-dawn-66067.herokuapp.com/">Heroku Link</a>
+
+## Screenshot 
+<img src="./images/googlebooks.png"/>
